@@ -7,7 +7,8 @@ trails:
     ## to the next number down. Each link must be named a number like in the example trails below. There must be
     ## at least two links in each trail. (Or else what would GRASS degrade into?) The Last link's walks and 
     ## chances are ignored as there won't be an additional link for the block to degrade into, but you should
-    ## still input values to avoid errors
+    ## still input values to avoid errors. You can't repeat materials in the same or different links as this
+    ## would cause conflicts between different trails
     '1': 
       Material: GRASS
       MinWalks: 3

@@ -2,9 +2,6 @@ package me.drkmatr1984.Trails;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
@@ -20,14 +17,20 @@ public class TrailsConfigManager
 {
 	private Trails plugin;
 	private MainConfig config;
+	private TrailConfig trailConfig;
 	
 	public TrailsConfigManager(Trails plugin) {
 		this.plugin = plugin;
 		this.config = new MainConfig(plugin);
+		this.trailConfig = new TrailConfig(plugin);
 	}
 	
 	public MainConfig getConfig() {
 		return this.config;
+	}
+	
+	public TrailConfig getTrailConfig() {
+		return this.trailConfig;
 	}
 	
 	public class MainConfig
@@ -77,7 +80,7 @@ public class TrailsConfigManager
 		private FileConfiguration data;
 
 		public TrailConfig(Trails plugin) {
-			
+			loadConfig();
 		}
 		
 		public void saveDefaultTrailConfig() {
@@ -110,7 +113,6 @@ public class TrailsConfigManager
 					Bukkit.getLogger().log(Level.SEVERE, "Your Trail, " + trailName + ", only has one link.");
 					Bukkit.getLogger().log(Level.SEVERE, "All trails must have two or more.");
 				}
-				
 			}
 		}
 		

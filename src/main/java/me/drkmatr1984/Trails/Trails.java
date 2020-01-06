@@ -4,10 +4,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import me.drkmatr1984.Trails.compatibility.TownyHook;
 import me.drkmatr1984.Trails.compatibility.WorldGuardHook;
+import me.drkmatr1984.Trails.listeners.MoveEventListener;
 import me.drkmatr1984.Trails.objects.Trail;
 import me.drkmatr1984.customevents.CustomEvents;
 
@@ -31,12 +33,14 @@ public class Trails extends JavaPlugin{
 		if(Bukkit.getServer().getPluginManager().getPlugin("Towny") != null) {
 	         this.townyHook = new TownyHook();
 	    }
+	    
+		Bukkit.getServer().getPluginManager().registerEvents(new MoveEventListener(this), this);
 	}
 	
 	@Override
 	public void onLoad() {
 		if(Bukkit.getServer().getPluginManager().getPlugin("WorldGuard") != null) {
-	        this.wgHook = new WorldGuardHook();
+	        this.wgHook = new WorldGuardHook(this);
 	    }
 	}
 	
@@ -44,6 +48,16 @@ public class Trails extends JavaPlugin{
 		   this.dataManager.getBlockData().saveBlockList();
 	}
 
+	public TrailsConfigManager getConfigManager() 
+	{
+		return this.configManager;
+	}
+	
+	public TrailsDataManager getDataManager() 
+	{
+		return this.dataManager;
+	}
+	
 	public TownyHook getTownyHook() {
 		return townyHook;
 	}
@@ -73,4 +87,7 @@ public class Trails extends JavaPlugin{
 		return null;
 	}
 	
+	public boolean isToggled(Player p) {
+		return this.dataManager.getPlayerData().isToggled(p);
+	}
 }

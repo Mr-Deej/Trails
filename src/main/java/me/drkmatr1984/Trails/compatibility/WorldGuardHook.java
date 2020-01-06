@@ -16,12 +16,15 @@ import com.sk89q.worldguard.protection.flags.registry.FlagConflictException;
 import com.sk89q.worldguard.protection.flags.registry.FlagRegistry;
 import com.sk89q.worldguard.protection.regions.RegionQuery;
 
+import me.drkmatr1984.Trails.Trails;
+
 public class WorldGuardHook
 {
 	private WorldGuardPlugin wg;
 	public static StateFlag CREATE_TRAILS;
+	private Trails plugin;
 
-	public WorldGuardHook(){
+	public WorldGuardHook(Trails plugin){
 		this.wg = (WorldGuardPlugin) Bukkit.getServer().getPluginManager().getPlugin("WorldGuard");
 		FlagRegistry registry = WorldGuard.getInstance().getFlagRegistry();
 	    try {
@@ -46,12 +49,15 @@ public class WorldGuardHook
         RegionQuery query = WorldGuard.getInstance().getPlatform().getRegionContainer().createQuery();
         com.sk89q.worldedit.util.Location loc = BukkitAdapter.adapt(l);
         if (!hasBypass(p, l)) {
-            return query.testState(loc, WorldGuardPlugin.inst().wrapPlayer(p), Flags.BUILD);
+        	if(plugin.getConfigManager().getConfig().isUseTrailsFlag()) {
+        		return query.testState(loc, WorldGuardPlugin.inst().wrapPlayer(p), CREATE_TRAILS);
+        	}else {
+        		return query.testState(loc, WorldGuardPlugin.inst().wrapPlayer(p), Flags.BUILD);
+        	}    	
         }else {
             return true;
         }
     }
-
 
     public boolean hasBypass(Player p, Location l) {
         return WorldGuard.getInstance().getPlatform().getSessionManager().hasBypass(this.wg.wrapPlayer(p), BukkitAdapter.adapt(l.getWorld()));
