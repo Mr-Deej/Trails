@@ -1,9 +1,11 @@
-package me.ccrama.Trails.compatibility.towny;
+package me.drkmatr1984.Trails.compatibility;
 
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
+import com.palmergames.bukkit.towny.TownyAPI;
+import com.palmergames.bukkit.towny.db.TownyDataSource;
 import com.palmergames.bukkit.towny.exceptions.NotRegisteredException;
 import com.palmergames.bukkit.towny.object.Resident;
 import com.palmergames.bukkit.towny.object.TownBlock;
@@ -13,7 +15,10 @@ import com.palmergames.bukkit.towny.object.WorldCoord;
 public class TownyHook
 {
 	
+	private final TownyDataSource source;
+	
 	public TownyHook() {
+		source = TownyUniverse.getDataSource();
 	}
 	
 	public boolean hasTownPermission(Player p) {
@@ -31,7 +36,7 @@ public class TownyHook
 	}
 	
 	public boolean isWilderness(Location loc) {
-		if(TownyUniverse.isWilderness(loc.getBlock())) {
+		if(TownyAPI.getInstance().isWilderness(loc)) {
 			return true;
 		}
 		return false;
@@ -42,14 +47,14 @@ public class TownyHook
 	}
 	
 	public boolean isWilderness(Block block) {
-		return TownyUniverse.isWilderness(block);		
+		return TownyAPI.getInstance().isWilderness(block.getLocation());		
 	}
 	
 	public boolean isInHomeTown(Player p) {
 		Resident resident;
 		TownBlock block;
 		try {
-			resident = TownyUniverse.getDataSource().getResident(p.getName());
+			resident = source.getResident(p.getName());
 			block = WorldCoord.parseWorldCoord(p).getTownBlock();
 			if(block.hasTown()) {
 				if(resident.getTown() == block.getTown()) {
@@ -66,7 +71,7 @@ public class TownyHook
 		Resident resident;
 		TownBlock block;
 		try {
-			resident = TownyUniverse.getDataSource().getResident(p.getName());
+			resident = source.getResident(p.getName());
 			block = WorldCoord.parseWorldCoord(p).getTownBlock();
 			if(block.hasTown()) {
 				if(block.getTown().hasNation()) {

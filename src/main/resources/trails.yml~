@@ -1,0 +1,45 @@
+trails:
+  ## Name of trail type. Can be any name, and you can create any number of trails
+  Grass:
+    ## Links in the Trail. Each 'link' is a Material, a minimum number of walks to degrade the trail,
+    ## a maximum number of walks to degrade the trail, and a percentage chance(in whole integers) that
+    ## the trail will degrade when in between the minimum and maximum number of walks. The 'link' will degrade
+    ## to the next number down. Each link must be named a number like in the example trails below. There must be
+    ## at least two links in each trail. (Or else what would GRASS degrade into?) The Last link's walks and 
+    ## chances are ignored as there won't be an additional link for the block to degrade into.
+    '1': 
+      Material: GRASS
+      MinWalks: 3
+      MaxWalks: 7
+      DegradeChance: 25 
+    '2':
+      Material: DIRT
+      MinWalks: 5
+      MaxWalks: 10
+      DegradeChance: 15
+    '3':
+      Material: GRASS_PATH
+      MinWalks: 5
+      MaxWalks: 10
+      DegradeChance: 15
+  Cobble:
+    '1': 
+      Material: STONE
+      MinWalks: 10
+      MaxWalks: 14
+      DegradeChance: 50 
+    '2':
+      Material: GRAVEL
+      MinWalks: 8
+      MaxWalks: 15
+      DegradeChance: 25
+    '3':
+      Material: COBBLESTONE
+      MinWalks: 20
+      MaxWalks: 30
+      DegradeChance: 15
+    '4':
+      Material: STONE_BRICKS
+      MinWalks: 10
+      MaxWalks: 30
+      DegradeChance: 10

@@ -1,4 +1,4 @@
-package me.ccrama.Trails.objects;
+package me.drkmatr1984.Trails.objects;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
