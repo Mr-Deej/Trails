@@ -1,0 +1,32 @@
+name: Trails
+main: me.drkmatr1984.Trails.Trails
+version: 1.0
+api-version: 1.13
+softdepend: [WorldGuard, Towny]
+authors: [DrkMatr1984, ccrama]
+description: Create trails or paths where you walk
+commands:
+    trails:
+        description: Main trails command, also toggles your trails
+        aliases: [paths]
+    trails reload:
+        description: Reload the plugin config
+    trails toggle:
+        description: Toggle your Trails
+    trails on:
+        description: Toggle your Trails
+    trails off:
+        description: Toggle your Trails
+permissions:
+    trails.use:
+        description: Allows the user to create trails behind them when they walks
+        default: true
+    trails.toggle.self:
+        description: Allows the user to toggle trails on and off for themselves
+        default: true
+    trails.toggle.others:
+        description: Allows the user to toggle other players trails
+        default: op
+    trails.reload:
+        description: Allows the user reload the plugin config
+        default: op
