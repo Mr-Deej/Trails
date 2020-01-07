@@ -2,11 +2,9 @@ package me.drkmatr1984.Trails;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
@@ -14,7 +12,9 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 
+import io.netty.util.internal.ConcurrentSet;
 import me.drkmatr1984.Trails.objects.TrailBlock;
 import me.drkmatr1984.Trails.objects.WrappedLocation;;
 
@@ -51,12 +51,20 @@ public class TrailsDataManager
 		private File dataFolder;
 		private FileConfiguration data;
 		private Trails plugin;
-		public List<TrailBlock> walkedOver;
+		public ConcurrentSet<TrailBlock> walkedOver;
 		
 		public BlockDataManager(Trails plugin){		
 			this.plugin = plugin;
 			dataFolder = new File(this.plugin.getDataFolder().toString()+"/data");
 			initLists();
+			if(this.plugin.getConfigManager().getConfig().isSaveData()) {
+		    	new BukkitRunnable() {
+					@Override
+					public void run() {
+						saveBlockList();
+					}
+		    	}.runTaskLaterAsynchronously(this.plugin, this.plugin.getConfigManager().getConfig().getSaveInterval() * 60 * 20);
+		    }
 		}
 			
 		private void initLists(){
@@ -80,7 +88,7 @@ public class TrailsDataManager
 		  
 		public void loadBlockList(){
 			//pickup toggle data
-			walkedOver = new ArrayList<TrailBlock>();
+			walkedOver = new ConcurrentSet<TrailBlock>();
 			data = YamlConfiguration.loadConfiguration(dataFile);
 			for(String key : data.getKeys(false)){
 				ConfigurationSection section = data.getConfigurationSection(key);
@@ -100,7 +108,6 @@ public class TrailsDataManager
 		}
 		  
 		public void saveBlockList(){
-			//pickup toggle data
 			if(walkedOver!=null && !walkedOver.isEmpty())
 			{
 				int i = 0;
@@ -127,7 +134,7 @@ public class TrailsDataManager
 			}	
 		}
 		
-		public List<TrailBlock> getTrailBlocks(){
+		public ConcurrentSet<TrailBlock> getTrailBlocks(){
 			return walkedOver;
 		}
 		
@@ -146,7 +153,7 @@ public class TrailsDataManager
 		private File dataFolder;
 		private FileConfiguration data;
 		private Trails plugin;
-		private Map<UUID, Boolean> players = new HashMap<UUID, Boolean>();
+		private ConcurrentMap<UUID, Boolean> players = new ConcurrentHashMap<UUID, Boolean>();
 		
 		public PlayerDataManager(Trails plugin){		
 			this.plugin = plugin;
@@ -157,6 +164,14 @@ public class TrailsDataManager
 		private void initLists(){
 			saveDefaultPlayerList();
 			loadPlayerList();
+			if(this.plugin.getConfigManager().getConfig().isSaveData()) {
+		    	new BukkitRunnable() {
+					@Override
+					public void run() {
+						savePlayerList();
+					}
+		    	}.runTaskLaterAsynchronously(this.plugin, this.plugin.getConfigManager().getConfig().getSaveInterval() * 60 * 20);
+		    }
 		}
 		
 	    ////////////////////////////////////////////////////////////

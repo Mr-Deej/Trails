@@ -6,7 +6,6 @@ import java.util.Map;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-
 import me.drkmatr1984.Trails.compatibility.TownyHook;
 import me.drkmatr1984.Trails.compatibility.WorldGuardHook;
 import me.drkmatr1984.Trails.listeners.MoveEventListener;
@@ -33,7 +32,6 @@ public class Trails extends JavaPlugin{
 		if(Bukkit.getServer().getPluginManager().getPlugin("Towny") != null) {
 	         this.townyHook = new TownyHook();
 	    }
-	    
 		Bukkit.getServer().getPluginManager().registerEvents(new MoveEventListener(this), this);
 	}
 	

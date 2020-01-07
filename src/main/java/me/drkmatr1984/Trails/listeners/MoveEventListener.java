@@ -77,19 +77,19 @@ public class MoveEventListener implements Listener {
 	    					walks = tb.getWalks();
 	    					plugin.getDataManager().getBlockData().removeTrailBlock(tb);
 	    				}
-	    				if(walks >= link.getMinWalks() && walks < link.getMaxWalks() ) {
-		    				int roll = new Random().nextInt(100);
-		    				if(roll < link.getDegradeChance()) {
-		    					changeNext(block, trail, i);
-		    					return;
-		    				}
-		    			}
-		    			if(walks >= link.getMaxWalks()) {
+	    			}
+	    			if(walks >= link.getMinWalks() && walks < link.getMaxWalks() ) {
+		    			int roll = new Random().nextInt(100);
+		    			if(roll < link.getDegradeChance()) {
 		    				changeNext(block, trail, i);
 		    				return;
 		    			}
-		    			plugin.getDataManager().getBlockData().addTrailBlock(new TrailBlock(block.getLocation(), walks, trail.getTrailName()));
-	    			}	    			
+		    		}
+		    		if(walks >= link.getMaxWalks()) {
+		    			changeNext(block, trail, i);
+		    			return;
+		    		}
+		    		plugin.getDataManager().getBlockData().addTrailBlock(new TrailBlock(block.getLocation(), walks, trail.getTrailName()));	    		    			
 	    		}
 	    	}
 	    	
