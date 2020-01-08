@@ -35,6 +35,8 @@ public class TrailsConfigManager
 	
 	public class MainConfig
 	{
+		private File dataFile;
+		
 		private boolean isPathsInWilderness;
 		private boolean isTownyPathsPerm;
 		private boolean isUseTrailsFlag;
@@ -42,6 +44,7 @@ public class TrailsConfigManager
 		private int interval;
 		
 		public MainConfig(Trails plugin) {
+			saveDefaultConfig();
 			loadConfig();
 		}
 		
@@ -52,6 +55,19 @@ public class TrailsConfigManager
 			this.isSaveData = plugin.getConfig().getBoolean("Data.Enabled");
 			this.interval = plugin.getConfig().getInt("Data.Interval");
 		}
+		
+		public void saveDefaultConfig() {
+			//pickup toggle data
+			if(!(plugin.getDataFolder().exists())){
+				plugin.getDataFolder().mkdir();
+			}
+		    if (dataFile == null) {
+		        dataFile = new File(plugin.getDataFolder(), "config.yml");
+		    }
+		    if (!dataFile.exists()) {           
+		        plugin.saveResource("config.yml", false);
+		    }
+	    }
 		
 		public boolean isPathsInWilderness() {
 			return this.isPathsInWilderness;
@@ -80,6 +96,7 @@ public class TrailsConfigManager
 		private FileConfiguration data;
 
 		public TrailConfig(Trails plugin) {
+			saveDefaultTrailConfig();
 			loadConfig();
 		}
 		
@@ -114,6 +131,37 @@ public class TrailsConfigManager
 					Bukkit.getLogger().log(Level.SEVERE, "All trails must have two or more.");
 				}
 			}
+		}
+		
+	}
+	
+    public class LanguageFile{
+		
+		private File dataFile;
+		private FileConfiguration data;
+		public String noPerms;
+
+		public LanguageFile(Trails plugin) {
+			saveDefaultLanguageFileConfig();
+			loadConfig();
+		}
+		
+		public void saveDefaultLanguageFileConfig() {
+			//pickup toggle data
+			if(!(plugin.getDataFolder().exists())){
+				plugin.getDataFolder().mkdir();
+			}
+		    if (dataFile == null) {
+		        dataFile = new File(plugin.getDataFolder(), "language.yml");
+		    }
+		    if (!dataFile.exists()) {           
+		        plugin.saveResource("language.yml", false);
+		    }
+	    }
+		
+		public void loadConfig() {
+			data = YamlConfiguration.loadConfiguration(dataFile);
+			noPerms = data.getString("");
 		}
 		
 	}

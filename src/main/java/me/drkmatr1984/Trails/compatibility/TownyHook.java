@@ -9,7 +9,6 @@ import com.palmergames.bukkit.towny.db.TownyDataSource;
 import com.palmergames.bukkit.towny.exceptions.NotRegisteredException;
 import com.palmergames.bukkit.towny.object.Resident;
 import com.palmergames.bukkit.towny.object.TownBlock;
-import com.palmergames.bukkit.towny.object.TownyUniverse;
 import com.palmergames.bukkit.towny.object.WorldCoord;
 
 public class TownyHook
@@ -18,7 +17,7 @@ public class TownyHook
 	private final TownyDataSource source;
 	
 	public TownyHook() {
-		source = TownyUniverse.getDataSource();
+		source = TownyAPI.getInstance().getDataSource();
 	}
 	
 	public boolean hasTownPermission(Player p) {

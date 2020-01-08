@@ -30,3 +30,9 @@ permissions:
     trails.reload:
         description: Allows the user reload the plugin config
         default: op
+    trails.towny.town
+        description: Allows the user to make trails in their town
+        default: op
+    trails.towny.nation
+        description: Allows the user to make trails in their nation
+        default: op

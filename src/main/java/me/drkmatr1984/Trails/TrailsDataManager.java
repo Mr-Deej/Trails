@@ -63,7 +63,7 @@ public class TrailsDataManager
 					public void run() {
 						saveBlockList();
 					}
-		    	}.runTaskLaterAsynchronously(this.plugin, this.plugin.getConfigManager().getConfig().getSaveInterval() * 60 * 20);
+		    	}.runTaskTimerAsynchronously(this.plugin, this.plugin.getConfigManager().getConfig().getSaveInterval() * 60 * 20, this.plugin.getConfigManager().getConfig().getSaveInterval() * 60 * 20);
 		    }
 		}
 			
@@ -170,7 +170,7 @@ public class TrailsDataManager
 					public void run() {
 						savePlayerList();
 					}
-		    	}.runTaskLaterAsynchronously(this.plugin, this.plugin.getConfigManager().getConfig().getSaveInterval() * 60 * 20);
+		    	}.runTaskTimerAsynchronously(this.plugin, this.plugin.getConfigManager().getConfig().getSaveInterval() * 60 * 20, this.plugin.getConfigManager().getConfig().getSaveInterval() * 60 * 20);
 		    }
 		}
 		
@@ -225,6 +225,23 @@ public class TrailsDataManager
 				players.put(p.getUniqueId(), Boolean.TRUE);
 				return Boolean.TRUE;
 			}
+		}
+		
+		public boolean isToggled(UUID uuid) {
+			if(players.keySet().contains(uuid)) {
+				return players.get(uuid);
+			}else {
+				players.put(uuid, Boolean.TRUE);
+				return Boolean.TRUE;
+			}
+		}
+		
+		public void setToggled(Player p, boolean toggled) {
+			players.put(p.getUniqueId(), toggled);			
+		}
+		
+		public void setToggled(UUID p, boolean toggled) {
+			players.put(p, toggled);			
 		}
 	}
 }

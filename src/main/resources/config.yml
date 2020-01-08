@@ -10,7 +10,8 @@ Plugin-Integration:
     # WorldGuard integration adds a new Region flag "CREATE-TRAILS", which when set to true, allows players to 
     # create trails in that region. This is only needed if you plan to create regions that restrict other building
     # but still want to allow players to create trails in those regions. If this is set to false, it will have no
-    # effect, the flag will not be registered, and WorldGuard will follow standard building rules for that region.
+    # effect, the flag will not be registered, and WorldGuard will follow standard building rules for that region
+    # when it comes to creating trails.
     WorldGuard:
         UseTrailsFlag: 'true'
 Data:

@@ -2,6 +2,7 @@ package me.drkmatr1984.Trails;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -34,7 +35,7 @@ public class Trails extends JavaPlugin{
 	         this.townyHook = new TownyHook();
 	    }
 		Bukkit.getServer().getPluginManager().registerEvents(new MoveEventListener(this), this);
-		TrailsCommandHandler cHandler = new TrailsCommandHandler();
+		TrailsCommandHandler cHandler = new TrailsCommandHandler(this);
 		getCommand("trails").setExecutor(cHandler);
 		getCommand("paths").setExecutor(cHandler);
 	}
@@ -92,5 +93,17 @@ public class Trails extends JavaPlugin{
 	
 	public boolean isToggled(Player p) {
 		return this.dataManager.getPlayerData().isToggled(p);
+	}
+	
+	public boolean isToggled(UUID uuid) {
+		return this.dataManager.getPlayerData().isToggled(uuid);
+	}
+	
+	public void setToggled(UUID uuid, boolean toggled) {
+		this.dataManager.getPlayerData().setToggled(uuid, toggled);
+	}
+	
+	public void setToggled(Player p, boolean toggled) {
+		this.dataManager.getPlayerData().setToggled(p, toggled);
 	}
 }
