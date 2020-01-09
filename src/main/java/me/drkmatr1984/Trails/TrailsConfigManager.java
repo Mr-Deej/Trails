@@ -16,13 +16,20 @@ import me.drkmatr1984.Trails.objects.Trail;
 public class TrailsConfigManager
 {
 	private Trails plugin;
+	private File dataFolder;
 	private MainConfig config;
 	private TrailConfig trailConfig;
+	private LanguageConfig langConfig;
 	
 	public TrailsConfigManager(Trails plugin) {
 		this.plugin = plugin;
-		this.config = new MainConfig(plugin);
-		this.trailConfig = new TrailConfig(plugin);
+		this.dataFolder = plugin.getDataFolder();
+		if(!(dataFolder.exists())){
+			dataFolder.mkdir();
+		}
+		this.config = new MainConfig();
+		this.trailConfig = new TrailConfig();
+		this.langConfig = new LanguageConfig();
 	}
 	
 	public MainConfig getConfig() {
@@ -33,9 +40,14 @@ public class TrailsConfigManager
 		return this.trailConfig;
 	}
 	
+	public LanguageConfig getLanguageConfig() {
+		return this.langConfig;
+	}
+	
 	public class MainConfig
 	{
 		private File dataFile;
+		private FileConfiguration data;
 		
 		private boolean isPathsInWilderness;
 		private boolean isTownyPathsPerm;
@@ -43,26 +55,23 @@ public class TrailsConfigManager
 		private boolean isSaveData;
 		private int interval;
 		
-		public MainConfig(Trails plugin) {
+		public MainConfig() {
 			saveDefaultConfig();
 			loadConfig();
 		}
 		
 		public void loadConfig() {
-			this.isPathsInWilderness = plugin.getConfig().getBoolean("Plugin-Integration.Towny.PathsInWilderness");
-			this.isTownyPathsPerm = plugin.getConfig().getBoolean("Plugin-Integration.Towny.TownyPathsPerm");
-			this.isUseTrailsFlag = plugin.getConfig().getBoolean("Plugin-Integration.WorldGuard.UseTrailsFlag");
-			this.isSaveData = plugin.getConfig().getBoolean("Data.Enabled");
-			this.interval = plugin.getConfig().getInt("Data.Interval");
+			data = YamlConfiguration.loadConfiguration(dataFile);
+			this.isPathsInWilderness = data.getBoolean("Plugin-Integration.Towny.PathsInWilderness");
+			this.isTownyPathsPerm = data.getBoolean("Plugin-Integration.Towny.TownyPathsPerm");
+			this.isUseTrailsFlag = data.getBoolean("Plugin-Integration.WorldGuard.UseTrailsFlag");
+			this.isSaveData = data.getBoolean("Data.Enabled");
+			this.interval = data.getInt("Data.Interval");
 		}
 		
 		public void saveDefaultConfig() {
-			//pickup toggle data
-			if(!(plugin.getDataFolder().exists())){
-				plugin.getDataFolder().mkdir();
-			}
 		    if (dataFile == null) {
-		        dataFile = new File(plugin.getDataFolder(), "config.yml");
+		        dataFile = new File(dataFolder, "config.yml");
 		    }
 		    if (!dataFile.exists()) {           
 		        plugin.saveResource("config.yml", false);
@@ -95,18 +104,14 @@ public class TrailsConfigManager
 		private File dataFile;
 		private FileConfiguration data;
 
-		public TrailConfig(Trails plugin) {
+		public TrailConfig() {
 			saveDefaultTrailConfig();
 			loadConfig();
 		}
 		
 		public void saveDefaultTrailConfig() {
-			//pickup toggle data
-			if(!(plugin.getDataFolder().exists())){
-				plugin.getDataFolder().mkdir();
-			}
 		    if (dataFile == null) {
-		        dataFile = new File(plugin.getDataFolder(), "trails.yml");
+		        dataFile = new File(dataFolder, "trails.yml");
 		    }
 		    if (!dataFile.exists()) {           
 		        plugin.saveResource("trails.yml", false);
@@ -135,24 +140,27 @@ public class TrailsConfigManager
 		
 	}
 	
-    public class LanguageFile{
+    public class LanguageConfig{
 		
 		private File dataFile;
 		private FileConfiguration data;
 		public String noPerms;
+		public String errorWriteAccess;
+		public String cantSaveBlockData;
+		public String cantDecodeBlockData;
+		public String cantCreateBlockData;
+		public String cantSavePlayerData;
+		public String cantCreatePlayerData;
 
-		public LanguageFile(Trails plugin) {
+		public LanguageConfig() {
 			saveDefaultLanguageFileConfig();
 			loadConfig();
 		}
 		
 		public void saveDefaultLanguageFileConfig() {
 			//pickup toggle data
-			if(!(plugin.getDataFolder().exists())){
-				plugin.getDataFolder().mkdir();
-			}
 		    if (dataFile == null) {
-		        dataFile = new File(plugin.getDataFolder(), "language.yml");
+		        dataFile = new File(dataFolder, "language.yml");
 		    }
 		    if (!dataFile.exists()) {           
 		        plugin.saveResource("language.yml", false);
@@ -162,6 +170,12 @@ public class TrailsConfigManager
 		public void loadConfig() {
 			data = YamlConfiguration.loadConfiguration(dataFile);
 			noPerms = data.getString("");
+			errorWriteAccess = data.getString("error.write-access");
+			cantSaveBlockData = data.getString("error.cant-save-block-data");
+			cantDecodeBlockData = data.getString("error.cant-decode-block-data");
+			cantCreateBlockData = data.getString("error.cant-create-block-data");
+			cantSavePlayerData = data.getString("error.cant-save-player-data");
+			cantCreatePlayerData = data.getString("error.cant-create-player-data");
 		}
 		
 	}

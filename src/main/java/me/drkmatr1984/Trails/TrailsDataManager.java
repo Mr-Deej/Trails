@@ -15,6 +15,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import io.netty.util.internal.ConcurrentSet;
+import me.drkmatr1984.Trails.TrailsConfigManager.LanguageConfig;
 import me.drkmatr1984.Trails.objects.TrailBlock;
 import me.drkmatr1984.Trails.objects.WrappedLocation;;
 
@@ -23,10 +24,16 @@ public class TrailsDataManager
 	
 	private BlockDataManager blockData;
 	private PlayerDataManager playerData;
+	private Trails plugin;
+	private final File dataFolder;
+	private LanguageConfig langConfig;
 	
 	public TrailsDataManager(Trails plugin){
-		this.setBlockData(new BlockDataManager(plugin));
-		this.setPlayerData(new PlayerDataManager(plugin));
+		this.plugin = plugin;
+		this.dataFolder = new File(this.plugin.getDataFolder().toString()+"/data");
+		this.langConfig = this.plugin.getConfigManager().getLanguageConfig();
+		this.setBlockData(new BlockDataManager());
+		this.setPlayerData(new PlayerDataManager());
 	}
 	
 	public BlockDataManager getBlockData() {
@@ -48,14 +55,12 @@ public class TrailsDataManager
 	public class BlockDataManager{
 		
 		private File dataFile;
-		private File dataFolder;
 		private FileConfiguration data;
 		private Trails plugin;
 		public ConcurrentSet<TrailBlock> walkedOver;
 		
-		public BlockDataManager(Trails plugin){		
-			this.plugin = plugin;
-			dataFolder = new File(this.plugin.getDataFolder().toString()+"/data");
+		
+		public BlockDataManager(){
 			initLists();
 			if(this.plugin.getConfigManager().getConfig().isSaveData()) {
 		    	new BukkitRunnable() {
@@ -98,7 +103,7 @@ public class TrailsDataManager
 							try {
 								walkedOver.add(new TrailBlock(WrappedLocation.fromBase64(section.getString("location")), section.getInt("walks"), section.getString("trail")));
 							} catch (IOException e) {
-								Bukkit.getLogger().log(Level.SEVERE, "Trails is unable to decode the saved block data.");
+								Bukkit.getLogger().log(Level.SEVERE, langConfig.cantDecodeBlockData);
 							}
 						}
 					}
@@ -123,14 +128,14 @@ public class TrailsDataManager
 			try {
 				data.save(dataFile);
 			} catch (IOException e) {
-				Bukkit.getLogger().log(Level.SEVERE, "Trails is unable to save block data");
-				Bukkit.getLogger().log(Level.SEVERE, "Are you sure you have write-access?");
+				Bukkit.getLogger().log(Level.SEVERE, langConfig.cantSaveBlockData);
+				Bukkit.getLogger().log(Level.SEVERE, langConfig.errorWriteAccess);
 			}
 			try {
 				dataFile.createNewFile();
 			} catch (IOException e) {
-				Bukkit.getLogger().log(Level.SEVERE, "Trails is unable to create block data file");
-				Bukkit.getLogger().log(Level.SEVERE, "Are you sure you have write-access?");
+				Bukkit.getLogger().log(Level.SEVERE, langConfig.cantCreateBlockData);
+				Bukkit.getLogger().log(Level.SEVERE, langConfig.errorWriteAccess);
 			}	
 		}
 		
@@ -138,11 +143,40 @@ public class TrailsDataManager
 			return walkedOver;
 		}
 		
+		public boolean containsTrailBlock(TrailBlock b) {
+			if(walkedOver.contains(b)) {
+				return true;
+			}
+			for(TrailBlock trail : walkedOver) {
+				if(trail.getWrappedLocation().isLocation(b.getLocation()) && trail.getWalks() == b.getWalks() &&
+					trail.getTrailName().equalsIgnoreCase(b.getTrailName())	) {
+					return true;
+				}
+			}
+			return false;
+		}
+		
+		private void removeTrailBlockAtLocation(TrailBlock b) {
+			for(TrailBlock trail : walkedOver) {
+				if(trail.getWrappedLocation().isLocation(b.getLocation()) && 
+						trail.getTrailName().equalsIgnoreCase(b.getTrailName())	) {
+					walkedOver.remove(trail);
+				}
+			}
+		}
+		
 		public void addTrailBlock(TrailBlock b) {
+			removeTrailBlockAtLocation(b);
 			walkedOver.add(b);
 		}
 		
 		public void removeTrailBlock(TrailBlock b) {
+			for(TrailBlock trail : walkedOver) {
+				if(trail.getWrappedLocation().isLocation(b.getLocation()) && trail.getWalks() == b.getWalks() &&
+					trail.getTrailName().equalsIgnoreCase(b.getTrailName())	) {
+					walkedOver.remove(trail);
+				}
+			}
 			walkedOver.remove(b);
 		}
 	}
@@ -150,14 +184,11 @@ public class TrailsDataManager
 	public class PlayerDataManager
 	{
 		private File dataFile;
-		private File dataFolder;
 		private FileConfiguration data;
 		private Trails plugin;
 		private ConcurrentMap<UUID, Boolean> players = new ConcurrentHashMap<UUID, Boolean>();
 		
-		public PlayerDataManager(Trails plugin){		
-			this.plugin = plugin;
-			dataFolder = new File(this.plugin.getDataFolder().toString()+"/data");
+		public PlayerDataManager(){
 			initLists();
 		}
 			
@@ -207,14 +238,14 @@ public class TrailsDataManager
 			try {
 				data.save(dataFile);
 			} catch (IOException e) {
-				Bukkit.getLogger().log(Level.SEVERE, "Trails is unable to save player data");
-				Bukkit.getLogger().log(Level.SEVERE, "Are you sure you have write-access?");
+				Bukkit.getLogger().log(Level.SEVERE, langConfig.cantSavePlayerData);
+				Bukkit.getLogger().log(Level.SEVERE, langConfig.errorWriteAccess);
 			}
 			try {
 				dataFile.createNewFile();
 			} catch (IOException e) {
-				Bukkit.getLogger().log(Level.SEVERE, "Trails is unable to create player data file");
-				Bukkit.getLogger().log(Level.SEVERE, "Are you sure you have write-access?");
+				Bukkit.getLogger().log(Level.SEVERE, langConfig.cantCreatePlayerData);
+				Bukkit.getLogger().log(Level.SEVERE, langConfig.errorWriteAccess);
 			}	
 		}
 		

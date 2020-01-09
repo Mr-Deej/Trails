@@ -1,0 +1,9 @@
+commands:
+  
+error:
+  cant-decode-block-data: "Trails is unable to decode the saved block data."
+  cant-save-block-data: "Trails is unable to save block data."
+  cant-create-block-data: "Trails is unable to create block data file."
+  cant-save-player-data: "Trails is unable to save player data."
+  cant-create-player-data: "Trails is unable to create player data file."
+  write-access: "Are you sure you have write-access?"
