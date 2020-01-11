@@ -5,12 +5,13 @@ trails:
     ## a maximum number of walks to degrade the trail, and a percentage chance(in whole integers) that
     ## the trail will degrade when in between the minimum and maximum number of walks. The 'link' will degrade
     ## to the next number down. Each link must be named a number like in the example trails below. There must be
-    ## at least two links in each trail. (Or else what would GRASS degrade into?) The Last link's walks and 
+    ## at least two links in each trail. (Or else what would GRASS_BLOCK degrade into?) The Last link's walks and 
     ## chances are ignored as there won't be an additional link for the block to degrade into, but you should
     ## still input values to avoid errors. You can't repeat materials in the same or different links as this
-    ## would cause conflicts between different trails
+    ## would cause conflicts between different trails(Except for the last link. Since the code doesn't process a 
+    ## a change into another material after that.)
     '1': 
-      Material: GRASS
+      Material: GRASS_BLOCK
       MinWalks: 3
       MaxWalks: 7
       DegradeChance: 25 
@@ -36,12 +37,12 @@ trails:
       MaxWalks: 15
       DegradeChance: 25
     '3':
-      Material: COBBLESTONE
+      Material: COARSE_DIRT
       MinWalks: 20
       MaxWalks: 30
       DegradeChance: 15
     '4':
-      Material: STONE_BRICKS
+      Material: GRASS_PATH
       MinWalks: 10
       MaxWalks: 30
       DegradeChance: 10

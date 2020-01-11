@@ -8,6 +8,9 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -16,6 +19,8 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import io.netty.util.internal.ConcurrentSet;
 import me.drkmatr1984.Trails.TrailsConfigManager.LanguageConfig;
+import me.drkmatr1984.Trails.objects.Link;
+import me.drkmatr1984.Trails.objects.Trail;
 import me.drkmatr1984.Trails.objects.TrailBlock;
 import me.drkmatr1984.Trails.objects.WrappedLocation;;
 
@@ -56,19 +61,25 @@ public class TrailsDataManager
 		
 		private File dataFile;
 		private FileConfiguration data;
-		private Trails plugin;
 		public ConcurrentSet<TrailBlock> walkedOver;
 		
 		
 		public BlockDataManager(){
 			initLists();
-			if(this.plugin.getConfigManager().getConfig().isSaveData()) {
+			if(plugin.getConfigManager().getConfig().isSaveData()) {
 		    	new BukkitRunnable() {
 					@Override
 					public void run() {
 						saveBlockList();
+						//send save message to players with reload perm
+						for(Player p : Bukkit.getServer().getOnlinePlayers()) {
+							if(p.hasPermission("trails.savemessage")) {
+								p.sendMessage(ChatColor.translateAlternateColorCodes('&', langConfig.prefix + langConfig.saveData));
+							}
+						}
+						Bukkit.getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', langConfig.prefix + langConfig.saveData));
 					}
-		    	}.runTaskTimerAsynchronously(this.plugin, this.plugin.getConfigManager().getConfig().getSaveInterval() * 60 * 20, this.plugin.getConfigManager().getConfig().getSaveInterval() * 60 * 20);
+		    	}.runTaskTimerAsynchronously(plugin, plugin.getConfigManager().getConfig().getSaveInterval() * 60 * 20, plugin.getConfigManager().getConfig().getSaveInterval() * 60 * 20);
 		    }
 		}
 			
@@ -79,7 +90,6 @@ public class TrailsDataManager
 		
 	    ////////////////////////////////////////////////////////////
 		public void saveDefaultBlockList() {
-			//pickup toggle data
 			if(!(dataFolder.exists())){
 				dataFolder.mkdir();
 			}
@@ -92,7 +102,6 @@ public class TrailsDataManager
 	    }
 		  
 		public void loadBlockList(){
-			//pickup toggle data
 			walkedOver = new ConcurrentSet<TrailBlock>();
 			data = YamlConfiguration.loadConfiguration(dataFile);
 			for(String key : data.getKeys(false)){
@@ -101,9 +110,9 @@ public class TrailsDataManager
 					if(section.getInt("walks")!=0){
 						if(section.getString("location")!=null && section.getString("location")!=""){
 							try {
-								walkedOver.add(new TrailBlock(WrappedLocation.fromBase64(section.getString("location")), section.getInt("walks"), section.getString("trail")));
+								walkedOver.add(new TrailBlock(WrappedLocation.fromBase64(section.getString("location")), section.getInt("walks"), Link.fromBase64(section.getString("link"))));
 							} catch (IOException e) {
-								Bukkit.getLogger().log(Level.SEVERE, langConfig.cantDecodeBlockData);
+								Bukkit.getLogger().log(Level.SEVERE, ChatColor.stripColor(langConfig.prefix + langConfig.cantDecodeBlockData));
 							}
 						}
 					}
@@ -119,7 +128,7 @@ public class TrailsDataManager
 				for(TrailBlock b : walkedOver){
 					data.set(i + ".location", b.getWrappedLocation().toBase64());
 					data.set(i + ".walks", b.getWalks());
-					data.set(i + ".trail", b.getTrailName());
+					data.set(i + ".link", b.getLink().toBase64());
 					i++;
 				}
 			}
@@ -128,19 +137,55 @@ public class TrailsDataManager
 			try {
 				data.save(dataFile);
 			} catch (IOException e) {
-				Bukkit.getLogger().log(Level.SEVERE, langConfig.cantSaveBlockData);
-				Bukkit.getLogger().log(Level.SEVERE, langConfig.errorWriteAccess);
+				Bukkit.getLogger().log(Level.SEVERE, ChatColor.stripColor(langConfig.prefix + langConfig.cantSaveBlockData));
+				Bukkit.getLogger().log(Level.SEVERE, ChatColor.stripColor(langConfig.prefix + langConfig.errorWriteAccess));
 			}
 			try {
 				dataFile.createNewFile();
 			} catch (IOException e) {
-				Bukkit.getLogger().log(Level.SEVERE, langConfig.cantCreateBlockData);
-				Bukkit.getLogger().log(Level.SEVERE, langConfig.errorWriteAccess);
+				Bukkit.getLogger().log(Level.SEVERE, ChatColor.stripColor(langConfig.prefix + langConfig.cantCreateBlockData));
+				Bukkit.getLogger().log(Level.SEVERE, ChatColor.stripColor(langConfig.prefix + langConfig.errorWriteAccess));
 			}	
 		}
 		
 		public ConcurrentSet<TrailBlock> getTrailBlocks(){
 			return walkedOver;
+		}
+		
+		public boolean isTrailBlock(Block b) {
+			for(TrailBlock trail : walkedOver) {
+				if(trail.getWrappedLocation().isLocation(b.getLocation())) {
+					return true;
+				}
+			}
+			return false;
+		}
+		
+		public boolean isTrailBlock(Location loc) {
+			for(TrailBlock trail : walkedOver) {
+				if(trail.getWrappedLocation().isLocation(loc)) {
+					return true;
+				}
+			}
+			return false;
+		}
+		
+		public TrailBlock getTrailBlock(Location loc) {
+			for(TrailBlock trail : walkedOver) {
+				if(trail.getWrappedLocation().isLocation(loc)) {
+					return trail;
+				}
+			}
+			return null;
+		}
+		
+		public TrailBlock getTrailBlock(Block b) {
+			for(TrailBlock trail : walkedOver) {
+				if(trail.getWrappedLocation().isLocation(b.getLocation())) {
+					return trail;
+				}
+			}
+			return null;
 		}
 		
 		public boolean containsTrailBlock(TrailBlock b) {
@@ -156,7 +201,7 @@ public class TrailsDataManager
 			return false;
 		}
 		
-		private void removeTrailBlockAtLocation(TrailBlock b) {
+		public void removeTrailBlock(TrailBlock b) {
 			for(TrailBlock trail : walkedOver) {
 				if(trail.getWrappedLocation().isLocation(b.getLocation()) && 
 						trail.getTrailName().equalsIgnoreCase(b.getTrailName())	) {
@@ -166,26 +211,16 @@ public class TrailsDataManager
 		}
 		
 		public void addTrailBlock(TrailBlock b) {
-			removeTrailBlockAtLocation(b);
+			removeTrailBlock(b);
 			walkedOver.add(b);
 		}
 		
-		public void removeTrailBlock(TrailBlock b) {
-			for(TrailBlock trail : walkedOver) {
-				if(trail.getWrappedLocation().isLocation(b.getLocation()) && trail.getWalks() == b.getWalks() &&
-					trail.getTrailName().equalsIgnoreCase(b.getTrailName())	) {
-					walkedOver.remove(trail);
-				}
-			}
-			walkedOver.remove(b);
-		}
 	}
 	
 	public class PlayerDataManager
 	{
 		private File dataFile;
 		private FileConfiguration data;
-		private Trails plugin;
 		private ConcurrentMap<UUID, Boolean> players = new ConcurrentHashMap<UUID, Boolean>();
 		
 		public PlayerDataManager(){
@@ -195,13 +230,13 @@ public class TrailsDataManager
 		private void initLists(){
 			saveDefaultPlayerList();
 			loadPlayerList();
-			if(this.plugin.getConfigManager().getConfig().isSaveData()) {
+			if(plugin.getConfigManager().getConfig().isSaveData()) {
 		    	new BukkitRunnable() {
 					@Override
 					public void run() {
 						savePlayerList();
 					}
-		    	}.runTaskTimerAsynchronously(this.plugin, this.plugin.getConfigManager().getConfig().getSaveInterval() * 60 * 20, this.plugin.getConfigManager().getConfig().getSaveInterval() * 60 * 20);
+		    	}.runTaskTimerAsynchronously(plugin, plugin.getConfigManager().getConfig().getSaveInterval() * 60 * 20, plugin.getConfigManager().getConfig().getSaveInterval() * 60 * 20);
 		    }
 		}
 		
@@ -238,14 +273,14 @@ public class TrailsDataManager
 			try {
 				data.save(dataFile);
 			} catch (IOException e) {
-				Bukkit.getLogger().log(Level.SEVERE, langConfig.cantSavePlayerData);
-				Bukkit.getLogger().log(Level.SEVERE, langConfig.errorWriteAccess);
+				Bukkit.getLogger().log(Level.SEVERE, ChatColor.stripColor(langConfig.prefix + langConfig.cantSavePlayerData));
+				Bukkit.getLogger().log(Level.SEVERE, ChatColor.stripColor(langConfig.prefix + langConfig.errorWriteAccess));
 			}
 			try {
 				dataFile.createNewFile();
 			} catch (IOException e) {
-				Bukkit.getLogger().log(Level.SEVERE, langConfig.cantCreatePlayerData);
-				Bukkit.getLogger().log(Level.SEVERE, langConfig.errorWriteAccess);
+				Bukkit.getLogger().log(Level.SEVERE, ChatColor.stripColor(langConfig.prefix + langConfig.cantCreatePlayerData));
+				Bukkit.getLogger().log(Level.SEVERE, ChatColor.stripColor(langConfig.prefix + langConfig.errorWriteAccess));
 			}	
 		}
 		
@@ -275,4 +310,5 @@ public class TrailsDataManager
 			players.put(p, toggled);			
 		}
 	}
+	
 }

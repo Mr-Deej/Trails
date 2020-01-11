@@ -38,4 +38,7 @@ public class Trail implements Serializable
 		return null;
 	}
 
+	public Link getFirstLink() {
+		return links.get(0);
+	}
 }

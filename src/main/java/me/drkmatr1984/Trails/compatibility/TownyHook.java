@@ -61,7 +61,7 @@ public class TownyHook
 				}
 			}
 		} catch (NotRegisteredException e) {
-			p.sendMessage("[Trails] Are you sure you are in a town/nation?");
+			//p.sendMessage("[Trails] Are you sure you are in a town/nation?");
 		}		
 		return false;
 	}
@@ -80,7 +80,7 @@ public class TownyHook
 				}				
 			}
 		} catch (NotRegisteredException e) {
-			p.sendMessage("[Trails] Are you sure you are in a town/nation?");
+			//p.sendMessage("[Trails] Are you sure you are in a town/nation?");
 		}		
 		return false;
 	}

@@ -9,22 +9,22 @@ public class TrailBlock implements Serializable{
 	private static final long serialVersionUID = -5944092517430475806L;
 	private WrappedLocation location;
 	private Integer walks = 0;
-	private String trail;
+	private Link link;
 	
 	/**
 	 * 
 	 */
 	
-	public TrailBlock(WrappedLocation location, Integer numberOfWalks, String trail) {
+	public TrailBlock(WrappedLocation location, Integer numberOfWalks, Link link) {
 		this.location = location;
 		this.walks = numberOfWalks;
-		this.trail = trail;
+		this.link = link;
 	}
 	
-	public TrailBlock(Location location, Integer numberOfWalks, String trail) {
+	public TrailBlock(Location location, Integer numberOfWalks, Link link) {
 		this.location = new WrappedLocation(location);
 		this.walks = numberOfWalks;
-		this.trail = trail;
+		this.link = link;
 	}
 	
 	public Location getLocation() {
@@ -40,6 +40,10 @@ public class TrailBlock implements Serializable{
 	}
 	
 	public String getTrailName() {
-		return this.trail;
+		return this.link.getTrailName();
+	}
+	
+	public Link getLink() {
+		return this.link;
 	}
 }

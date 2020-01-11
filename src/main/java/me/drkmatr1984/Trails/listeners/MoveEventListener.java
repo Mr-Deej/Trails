@@ -14,8 +14,8 @@ import org.bukkit.inventory.EquipmentSlot;
 
 import me.drkmatr1984.Trails.Trails;
 import me.drkmatr1984.Trails.objects.Link;
-import me.drkmatr1984.Trails.objects.Trail;
 import me.drkmatr1984.Trails.objects.TrailBlock;
+import me.drkmatr1984.Trails.objects.WrappedLocation;
 import me.drkmatr1984.customevents.moveEvents.SignificantPlayerMoveEvent;
 
 public class MoveEventListener implements Listener {
@@ -30,15 +30,19 @@ public class MoveEventListener implements Listener {
 	@EventHandler
 	public void walk(SignificantPlayerMoveEvent e) {
 		Player p = e.getPlayer();
-		if(!plugin.isToggled(p)) {
+		p.sendMessage("Event is firing");
+		if(!plugin.isToggled(p) || !(p.hasPermission("trails.use"))) {
 			return;
 		}
 		// Check towny conditions
 		if(plugin.getTownyHook()!=null) {
-			if(plugin.getTownyHook().isWilderness(p) && !plugin.getConfigManager().getConfig().isPathsInWilderness()) {
-				return;
+			if(plugin.getTownyHook().isWilderness(p)) {
+				if(!(plugin.getConfigManager().getConfig().isPathsInWilderness())) {
+					return;
+				}
 			}
 			if(plugin.getConfigManager().getConfig().isTownyPathsPerm()) {
+				p.sendMessage("Checking towny paths perms");
 				if(plugin.getTownyHook().isInHomeNation(p) && !plugin.getTownyHook().hasNationPermission(p) && !plugin.getTownyHook().isInHomeTown(p)) {
 					return;
 				}
@@ -48,18 +52,59 @@ public class MoveEventListener implements Listener {
 			}		
 		}
 		// Check worldguard conditions
-		if(plugin.getWgHook()!=null && !plugin.getWgHook().canBuild(p, p.getLocation().subtract(0.0D, 1.0D, 0.0D)))	
+		if(plugin.getWgHook()!=null && !plugin.getWgHook().canBuild(p, p.getLocation().subtract(0.0D, 1.0D, 0.0D)))	{
+			p.sendMessage("Worldguard checks programmed wrong");
 			return;
+		}
 		Block trailBlock = e.getFrom().subtract(0.0D, 1.0D, 0.0D).getBlock();
 		BlockPlaceEvent event = new BlockPlaceEvent(trailBlock, trailBlock.getState(), (trailBlock.getLocation().subtract(0.0D, 1.0D, 0.0D)).getBlock(),
 				p.getInventory().getItemInMainHand(), p, true, EquipmentSlot.HAND);
 		Bukkit.getServer().getPluginManager().callEvent(event);
+		p.sendMessage("Good up until Checking if event is cancelled");
 		if(!event.isCancelled()) {
-			makePath(e.getFrom().subtract(0.0D, 1.0D, 0.0D).getBlock());
-		}
+			if((plugin.getDataManager().getBlockData().isTrailBlock(trailBlock) || plugin.isTrailStartMaterial(trailBlock))) {
+				p.sendMessage("Making Trail!");
+				degradePath(trailBlock);
+			}else {
+				p.sendMessage("Not the right type of block I guess?");
+			}
+		}else {
+			p.sendMessage("BlockPlaceEvent is cancelled");
+		} 
 	}
 	
-	private void makePath(Block block) {
+	private void degradePath(Block block) {
+		if(plugin.getDataManager().getBlockData().isTrailBlock(block)) {
+			//Do stuff with already registered blocks
+			TrailBlock tb = plugin.getDataManager().getBlockData().getTrailBlock(block);
+			ArrayList<Link> links = plugin.getTrailByName(tb.getTrailName()).getLinks();
+			for(Link link : links) {
+				if(link.isLink(tb.getLink())) {
+					if((links.indexOf(link)+1) == links.size())
+						return;
+					Link nextLink = links.get((links.indexOf(link)+1));
+					int walks = tb.getWalks() + 1;
+					if(walks >= link.getMinWalks() && walks < link.getMaxWalks() ) {
+		    			int roll = new Random().nextInt(100);
+		    			if(roll < link.getDegradeChance()) {
+		    				changeNext(block, nextLink.getMaterial());
+		    				plugin.getDataManager().getBlockData().addTrailBlock(new TrailBlock(new WrappedLocation(block.getLocation()), 0, nextLink));
+		    				return;
+		    			}
+		    		}
+					if(walks >= link.getMaxWalks()) {
+		    			changeNext(block, nextLink.getMaterial());
+		    			plugin.getDataManager().getBlockData().addTrailBlock(new TrailBlock(new WrappedLocation(block.getLocation()), 0, nextLink));
+		    			return;
+		    		}
+					plugin.getDataManager().getBlockData().addTrailBlock(new TrailBlock(new WrappedLocation(block.getLocation()), walks, tb.getLink()));
+				}
+			}
+		}else {
+			//Start new trail
+			plugin.getDataManager().getBlockData().addTrailBlock(new TrailBlock(block.getLocation(), 1, plugin.getTrailByStartMaterial(block.getType()).getFirstLink()));
+		}
+		/*
 		Material type = block.getType();
 	    for(Trail trail : plugin.getTrails().values()) {
 	    	ArrayList<Link> links = trail.getLinks();
@@ -94,11 +139,13 @@ public class MoveEventListener implements Listener {
 	    	}
 	    	
 	    }
+	    */
 	}
 
-	private void changeNext(Block block, Trail trail, int linkIndex) {		
-	    block.setType((trail.getLinks().get(linkIndex +1)).getMaterial());
+	private void changeNext(Block block, Material material) {		
+	    block.setType(material);
 	    block.getState().update(true);
+	    
 	}	
 	
 }

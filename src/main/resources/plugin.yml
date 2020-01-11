@@ -19,7 +19,7 @@ commands:
         description: Toggle your Trails
 permissions:
     trails.use:
-        description: Allows the user to create trails behind them when they walks
+        description: Allows the user to create trails behind them when they walk, and use the commands at all
         default: true
     trails.toggle.self:
         description: Allows the user to toggle trails on and off for themselves
@@ -30,9 +30,12 @@ permissions:
     trails.reload:
         description: Allows the user reload the plugin config
         default: op
-    trails.towny.town
+    trails.savemessage:
+        description: Allows the user to get messages regarding the autosave feature
+        default: op
+    trails.towny.town:
         description: Allows the user to make trails in their town
         default: op
-    trails.towny.nation
+    trails.towny.nation:
         description: Allows the user to make trails in their nation
         default: op

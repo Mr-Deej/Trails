@@ -5,6 +5,8 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -29,8 +31,8 @@ public class Trails extends JavaPlugin{
 	    this.saveDefaultConfig();
 	    this.customEvents = new CustomEvents((JavaPlugin)this, false, false, true, false, false);
 	  	this.customEvents.initializeLib();
-	  	this.dataManager = new TrailsDataManager(this);
 	  	this.configManager = new TrailsConfigManager(this);
+	  	this.dataManager = new TrailsDataManager(this);
 		if(Bukkit.getServer().getPluginManager().getPlugin("Towny") != null) {
 	         this.townyHook = new TownyHook();
 	    }
@@ -91,6 +93,24 @@ public class Trails extends JavaPlugin{
 		return null;
 	}
 	
+	public Trail getTrailByStartMaterial(Material mat) {
+		for(Trail trail : trails.values()) {
+			if(trail.getFirstLink().getMaterial().equals(mat)) {
+				return trail;
+			}
+		}
+		return null;
+	}
+	
+	public boolean isTrailStartMaterial(Block b) {
+		for(Trail trail : getTrails().values()) {
+			if(trail.getFirstLink().getMaterial().equals(b.getType())) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	public boolean isToggled(Player p) {
 		return this.dataManager.getPlayerData().isToggled(p);
 	}
@@ -106,4 +126,5 @@ public class Trails extends JavaPlugin{
 	public void setToggled(Player p, boolean toggled) {
 		this.dataManager.getPlayerData().setToggled(p, toggled);
 	}
+
 }

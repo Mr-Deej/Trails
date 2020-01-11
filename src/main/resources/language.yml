@@ -1,5 +1,15 @@
+prefix: "&7[&6Trails&7]&r "
 commands:
-  
+  toggled-on-message: "&fYour trails have been toggled &aon"
+  toggled-off-message: "&fYour trails have been toggled &coff"
+  toggled-on-other: "&fYou have successfully toggled %player%'s trails &aon"
+  toggled-off-other: "&fYou have successfully toggled %player%'s trails &coff"
+  cannot-find-player: "We cannot find a player with the name %player%"
+  unknown-command-message: "&cUnknown Command"
+  no-perms-message: "&cYou don't have &6permission"
+  configs-reloaded: "Trails configs have been reloaded"
+admin:
+  data-saved: "Your data has been saved."
 error:
   cant-decode-block-data: "Trails is unable to decode the saved block data."
   cant-save-block-data: "Trails is unable to save block data."

@@ -44,6 +44,12 @@ public class TrailsConfigManager
 		return this.langConfig;
 	}
 	
+	public void reloadConfigs() {
+		getConfig().loadConfig();
+		getTrailConfig().loadConfig();
+		getLanguageConfig().loadConfig();
+	}
+	
 	public class MainConfig
 	{
 		private File dataFile;
@@ -60,15 +66,6 @@ public class TrailsConfigManager
 			loadConfig();
 		}
 		
-		public void loadConfig() {
-			data = YamlConfiguration.loadConfiguration(dataFile);
-			this.isPathsInWilderness = data.getBoolean("Plugin-Integration.Towny.PathsInWilderness");
-			this.isTownyPathsPerm = data.getBoolean("Plugin-Integration.Towny.TownyPathsPerm");
-			this.isUseTrailsFlag = data.getBoolean("Plugin-Integration.WorldGuard.UseTrailsFlag");
-			this.isSaveData = data.getBoolean("Data.Enabled");
-			this.interval = data.getInt("Data.Interval");
-		}
-		
 		public void saveDefaultConfig() {
 		    if (dataFile == null) {
 		        dataFile = new File(dataFolder, "config.yml");
@@ -77,6 +74,15 @@ public class TrailsConfigManager
 		        plugin.saveResource("config.yml", false);
 		    }
 	    }
+		
+		public void loadConfig() {
+			data = YamlConfiguration.loadConfiguration(dataFile);
+			this.isPathsInWilderness = Boolean.valueOf(data.getString("Plugin-Integration.Towny.PathsInWilderness"));
+			this.isTownyPathsPerm = Boolean.valueOf(data.getString("Plugin-Integration.Towny.TownyPathsPerm"));
+			this.isUseTrailsFlag = Boolean.valueOf(data.getString("Plugin-Integration.WorldGuard.UseTrailsFlag"));
+			this.isSaveData = Boolean.valueOf(data.getString("Data.Enabled"));
+			this.interval = data.getInt("Data.Interval");
+		}	
 		
 		public boolean isPathsInWilderness() {
 			return this.isPathsInWilderness;
@@ -127,7 +133,7 @@ public class TrailsConfigManager
 				ConfigurationSection linkSection = data.getConfigurationSection("trails." + trailName);
 				for(String linkNumbers : linkSection.getKeys(false)) {
 					ConfigurationSection linkConfig = data.getConfigurationSection("trails." + trailName + "." + linkNumbers);
-					links.add(new Link(Material.valueOf(linkConfig.getString("Material")), linkConfig.getInt("MinWalks"), linkConfig.getInt("MaxWalks"), linkConfig.getInt("DegradeChance")));					
+					links.add(new Link(trailName, Material.valueOf(linkConfig.getString("Material")), linkConfig.getInt("MinWalks"), linkConfig.getInt("MaxWalks"), linkConfig.getInt("DegradeChance")));					
 				}
 				if(links.size()>1) {
 					plugin.addTrail(new Trail(trailName, links));
@@ -144,6 +150,14 @@ public class TrailsConfigManager
 		
 		private File dataFile;
 		private FileConfiguration data;
+		public String prefix;
+		public String trailsToggledOn;
+		public String trailsToggledOff;
+		public String toggledOnOther;
+		public String toggledOffOther;
+		public String cannotFindPlayer;
+		public String reload;
+		public String unknownCommand;
 		public String noPerms;
 		public String errorWriteAccess;
 		public String cantSaveBlockData;
@@ -151,6 +165,7 @@ public class TrailsConfigManager
 		public String cantCreateBlockData;
 		public String cantSavePlayerData;
 		public String cantCreatePlayerData;
+		public String saveData;
 
 		public LanguageConfig() {
 			saveDefaultLanguageFileConfig();
@@ -169,13 +184,22 @@ public class TrailsConfigManager
 		
 		public void loadConfig() {
 			data = YamlConfiguration.loadConfiguration(dataFile);
-			noPerms = data.getString("");
+			prefix = data.getString("prefix");
+			trailsToggledOn = data.getString("commands.toggled-on-message");
+			trailsToggledOff = data.getString("commands.toggled-off-message");
+			toggledOnOther = data.getString("commands.toggled-on-other");
+			toggledOffOther = data.getString("commands.toggled-off-other");
+			cannotFindPlayer = data.getString("commands.cannot-find-player");
+			reload = data.getString("commands.configs-reloaded");
+			unknownCommand = data.getString("commands.unknown-command-message");
+			noPerms = data.getString("commands.no-perms-message");
 			errorWriteAccess = data.getString("error.write-access");
 			cantSaveBlockData = data.getString("error.cant-save-block-data");
 			cantDecodeBlockData = data.getString("error.cant-decode-block-data");
 			cantCreateBlockData = data.getString("error.cant-create-block-data");
 			cantSavePlayerData = data.getString("error.cant-save-player-data");
 			cantCreatePlayerData = data.getString("error.cant-create-player-data");
+			saveData = data.getString("admin.data-saved");
 		}
 		
 	}

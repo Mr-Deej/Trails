@@ -8,14 +8,20 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import me.drkmatr1984.Trails.TrailsConfigManager.LanguageConfig;
+import net.md_5.bungee.api.ChatColor;
+
 
 public class TrailsCommandHandler implements CommandExecutor
 {
 	private Trails plugin;
+	private LanguageConfig langConfig;
 	
 	public TrailsCommandHandler(Trails plugin){
 		this.plugin = plugin;
+		this.langConfig = this.plugin.getConfigManager().getLanguageConfig();
     }
+	
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args){
 		try{
@@ -28,71 +34,99 @@ public class TrailsCommandHandler implements CommandExecutor
 							if(player.hasPermission("trails.toggle.self")) {
 								if(this.plugin.isToggled(player)) {
 									this.plugin.setToggled(player, false);
+									player.sendMessage(ChatColor.translateAlternateColorCodes('&', langConfig.prefix + langConfig.trailsToggledOff));
 								}else {
 									this.plugin.setToggled(player, true);
+									player.sendMessage(ChatColor.translateAlternateColorCodes('&', langConfig.prefix + langConfig.trailsToggledOn));
 								}
-								//Self-Toggle Message here
 								return true;
 							}
-							//no perms message
+							player.sendMessage(ChatColor.translateAlternateColorCodes('&', langConfig.prefix + langConfig.noPerms));
 							return true;
 						}
 						if(args.length == 1){
 							if(args[0].equalsIgnoreCase("on")){
-								//manually turn trails on for the player, by checking if they're in the list, and if not, adding them.
+								if(player.hasPermission("trails.toggle.self")) {
+									if(!this.plugin.isToggled(player)) {
+										this.plugin.setToggled(player, true);
+									}
+									player.sendMessage(ChatColor.translateAlternateColorCodes('&', langConfig.prefix + langConfig.trailsToggledOn));
+									return true;
+								}
+								player.sendMessage(ChatColor.translateAlternateColorCodes('&', langConfig.prefix + langConfig.noPerms));
 								return true;
 							}
 							if(args[0].equalsIgnoreCase("off")){
-								//manually turn trails off for the player, by checking if they're in the list, and if they are, removing them.
+								if(player.hasPermission("trails.toggle.self")) {
+									if(this.plugin.isToggled(player)) {
+										this.plugin.setToggled(player, false);
+									}
+									player.sendMessage(ChatColor.translateAlternateColorCodes('&', langConfig.prefix + langConfig.trailsToggledOff));
+									return true;
+								}
+								player.sendMessage(ChatColor.translateAlternateColorCodes('&', langConfig.prefix + langConfig.noPerms));
 								return true;
 							}
 							if(args[0].equalsIgnoreCase("toggle")) {
 								if(player.hasPermission("trails.toggle.self")) {
 									if(this.plugin.isToggled(player)) {
 										this.plugin.setToggled(player, false);
+										player.sendMessage(ChatColor.translateAlternateColorCodes('&', langConfig.prefix + langConfig.trailsToggledOff));
 									}else {
 										this.plugin.setToggled(player, true);
+										player.sendMessage(ChatColor.translateAlternateColorCodes('&', langConfig.prefix + langConfig.trailsToggledOn));
 									}
-									//Self-Toggle Message here
 									return true;
 								}
-								//no perms message
+								player.sendMessage(ChatColor.translateAlternateColorCodes('&', langConfig.prefix + langConfig.noPerms));
 								return true;
 							}
 						}
 					}
 					if(args.length > 0){
 						if(args[0].equalsIgnoreCase("reload")) {
-							//reload the configs and shiz
+							if(sender.hasPermission("trails.reload")) {
+								this.plugin.getConfigManager().reloadConfigs();
+								sendSenderCorrect(sender, langConfig.prefix + langConfig.reload);
+								return true;
+							}
+							sendSenderCorrect(sender, langConfig.prefix + langConfig.noPerms);
 							return true;
 						}
 						if(args[0].equalsIgnoreCase("toggle")) {
 							if(args.length==2) {
 								if(sender.hasPermission("trails.toggle.others")) {
-									if(UUIDFetcher.getUUID(args[1])!=null && Bukkit.getOfflinePlayer(UUIDFetcher.getUUID(args[1])).hasPlayedBefore()) {
-										UUID uuid = UUIDFetcher.getUUID(args[1]);
+									String playerName = args[1];
+									UUID uuid = UUIDFetcher.getUUID(playerName);
+									if(uuid!=null && Bukkit.getOfflinePlayer(uuid).hasPlayedBefore()) {
 										if(this.plugin.isToggled(uuid)) {
 											this.plugin.setToggled(uuid, false);
-											// toggled off message
+											if(Bukkit.getOfflinePlayer(uuid).isOnline()) {
+												Bukkit.getPlayer(uuid).sendMessage(ChatColor.translateAlternateColorCodes('&', langConfig.prefix + langConfig.trailsToggledOff));
+											}
+											sendSenderCorrect(sender, langConfig.prefix + langConfig.toggledOffOther.replace("%player%", playerName));
 										}else {
 											this.plugin.setToggled(uuid, true);
-											// toggled on message
+											if(Bukkit.getOfflinePlayer(uuid).isOnline()) {
+												Bukkit.getPlayer(uuid).sendMessage(ChatColor.translateAlternateColorCodes('&', langConfig.prefix + langConfig.trailsToggledOn));
+											}
+											sendSenderCorrect(sender, langConfig.prefix + langConfig.toggledOnOther.replace("%player%", playerName));
 										}
 										return true;
 									}else {
-									// Cannot find player with that name
+									    sendSenderCorrect(sender, langConfig.prefix + langConfig.cannotFindPlayer.replace("%player%", playerName));
 										return true;
 									}	
 								}
-								//no perms message
+								sendSenderCorrect(sender, langConfig.prefix + langConfig.noPerms);
 								return true;
 							}
 						}
 					}
-					//unknown command message
+					sendSenderCorrect(sender, langConfig.prefix + langConfig.unknownCommand);
 					return true;
 				}
-				//no perms message
+				sendSenderCorrect(sender, langConfig.prefix + langConfig.noPerms);
 				return true;
 			}
 		}catch (Exception e) {
@@ -101,4 +135,11 @@ public class TrailsCommandHandler implements CommandExecutor
 		return false;
 	}
 	
+	private void sendSenderCorrect(CommandSender sender, String message) {
+		if(sender instanceof Player) {
+			sender.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
+		}else {
+			sender.sendMessage(ChatColor.stripColor(message));
+		}
+	}
 }
